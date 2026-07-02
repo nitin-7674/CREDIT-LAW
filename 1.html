@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Credit Card Origination</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
+}
+
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(120deg,#ffffff,#f7f7f7);
+overflow:hidden;
+}
+
+/* GOLD ANIMATED BACKGROUND */
+body::before{
+content:"";
+position:absolute;
+width:600px;
+height:600px;
+background:radial-gradient(circle,#ffd70055,#ffffff00 70%);
+top:-150px;
+left:-150px;
+animation:float1 6s infinite ease-in-out;
+}
+
+body::after{
+content:"";
+position:absolute;
+width:500px;
+height:500px;
+background:radial-gradient(circle,#ffd70033,#ffffff00 70%);
+bottom:-120px;
+right:-120px;
+animation:float2 7s infinite ease-in-out;
+}
+
+@keyframes float1{
+0%,100%{transform:translate(0,0);}
+50%{transform:translate(40px,60px);}
+}
+
+@keyframes float2{
+0%,100%{transform:translate(0,0);}
+50%{transform:translate(-50px,-40px);}
+}
+
+.wrapper{
+width:1100px;
+display:flex;
+gap:30px;
+z-index:1;
+}
+
+/* FORM */
+.container{
+flex:1;
+background:white;
+padding:30px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+color:#b8860b;
+margin-bottom:5px;
+}
+
+.sub{
+text-align:center;
+font-size:13px;
+color:#888;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+input,select{
+padding:12px;
+border:1px solid #eee;
+border-radius:10px;
+outline:none;
+transition:0.3s;
+}
+
+input:focus,select:focus{
+border-color:#d4af37;
+box-shadow:0 0 10px #ffd70055;
+}
+
+button{
+width:100%;
+margin-top:15px;
+padding:13px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#d4af37,#b8860b);
+color:white;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 25px #ffd70066;
+}
+
+/* STEP */
+.progress{
+display:flex;
+justify-content:space-between;
+margin-top:25px;
+position:relative;
+}
+
+.progress::before{
+content:"";
+position:absolute;
+top:16px;
+left:0;
+width:100%;
+height:3px;
+background:#eee;
+}
+
+.step{
+width:34px;
+height:34px;
+border-radius:50%;
+background:#ddd;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:600;
+z-index:1;
+transition:0.4s;
+}
+
+.active{
+background:#d4af37;
+color:white;
+transform:scale(1.15);
+box-shadow:0 0 12px #ffd700aa;
+}
+
+/* RESULT */
+.result{
+margin-top:15px;
+padding:12px;
+display:none;
+color:#333;
+}
+
+/* SIDE CARD */
+.cardBox{
+width:350px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.card{
+width:320px;
+height:190px;
+border-radius:18px;
+padding:20px;
+color:white;
+position:relative;
+overflow:hidden;
+transform:scale(0.9);
+transition:0.6s;
+box-shadow:0 20px 40px rgba(0,0,0,0.15);
+}
+
+.card::before{
+content:"";
+position:absolute;
+width:250px;
+height:250px;
+background:rgba(255,255,255,0.15);
+border-radius:50%;
+top:-120px;
+right:-100px;
+}
+
+.card h2{
+margin-top:40px;
+font-size:20px;
+}
+
+.card p{
+font-size:13px;
+margin-top:8px;
+opacity:0.9;
+}
+
+/* CARD TYPES */
+.gold{
+background:linear-gradient(135deg,#ffd700,#b8860b);
+}
+
+.silver{
+background:linear-gradient(135deg,#e5e7eb,#9ca3af);
+color:#222;
+}
+
+.platinum{
+background:linear-gradient(135deg,#1f1f1f,#434343);
+}
+
+.flip{
+transform:rotateY(360deg) scale(1);
+}
+
+.reject{
+margin-top:10px;
+color:red;
+font-weight:600;
+display:none;
+}
+
+@media(max-width:900px){
+.wrapper{flex-direction:column;}
+.cardBox{width:100%;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<!-- FORM -->
+<div class="container">
+
+<h1>Credit Card Origination</h1>
+<div class="sub">Luxury Banking Experience • Instant Eligibility Check</div>
+
+<div class="grid">
+<input id="name" placeholder="Full Name">
+<input id="age" type="number" placeholder="Age">
+
+<input id="income" type="number" placeholder="Monthly Income">
+<select id="emp">
+<option>Salaried</option>
+<option>Self Employed</option>
+<option>Student</option>
+<option>Unemployed</option>
+</select>
+
+<input id="credit" type="number" placeholder="Credit Score">
+<select id="loan">
+<option>No Loan</option>
+<option>Loan</option>
+</select>
+</div>
+
+<button onclick="process()">Check Eligibility</button>
+
+<div class="progress">
+<div class="step" id="s1">1</div>
+<div class="step" id="s2">2</div>
+<div class="step" id="s3">3</div>
+<div class="step" id="s4">4</div>
+</div>
+
+<div class="result" id="result"></div>
+<div class="reject" id="reject">Application Rejected</div>
+
+</div>
+
+<!-- SIDE CARD -->
+<div class="cardBox">
+<div class="card gold" id="card">
+<h2>Gold Card</h2>
+<p>Premium Cashback<br>Travel Benefits<br>Reward Points</p>
+</div>
+</div>
+
+</div>
+
+<script>
+
+function step(n){
+for(let i=1;i<=4;i++)
+document.getElementById("s"+i).classList.remove("active");
+
+for(let i=1;i<=n;i++)
+document.getElementById("s"+i).classList.add("active");
+}
+
+function process(){
+
+step(1);
+
+let income=+document.getElementById("income").value;
+let age=+document.getElementById("age").value;
+let credit=+document.getElementById("credit").value;
+let emp=document.getElementById("emp").value;
+let loan=document.getElementById("loan").value;
+
+let score=300;
+score+=credit*0.5;
+if(income>50000) score+=120;
+if(emp=="Salaried") score+=80;
+if(age>=21 && age<=60) score+=50;
+if(loan=="No Loan") score+=60;
+
+score=Math.min(900,Math.round(score));
+
+setTimeout(()=>{
+
+step(2);
+
+let eligible=score>=650 && emp!="Unemployed" && income>25000;
+
+document.getElementById("result").style.display="block";
+document.getElementById("result").innerHTML="Credit Score: <b>"+score+"</b>";
+
+if(!eligible){
+step(4);
+document.getElementById("reject").style.display="block";
+return;
+}
+
+step(3);
+
+let card=document.getElementById("card");
+
+card.classList.remove("gold","silver","platinum");
+
+let offer="Silver Card";
+
+if(score>800){
+offer="Platinum Card";
+card.classList.add("platinum");
+card.innerHTML="<h2>Platinum Card</h2><p>Elite Lounge Access<br>Luxury Benefits</p>";
+}
+else if(score>730){
+offer="Gold Card";
+card.classList.add("gold");
+card.innerHTML="<h2>Gold Card</h2><p>Cashback Rewards<br>Travel Offers</p>";
+}
+else{
+offer="Silver Card";
+card.classList.add("silver");
+card.innerHTML="<h2>Silver Card</h2><p>Basic Benefits<br>Entry Level Card</p>";
+}
+
+card.classList.add("flip");
+
+document.getElementById("result").innerHTML+="<br>Offer: <b>"+offer+"</b>";
+
+setTimeout(()=>step(4),800);
+
+},800);
+}
+
+</script>
+
+</body>
+</html>
