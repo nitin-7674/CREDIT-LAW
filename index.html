@@ -2,378 +2,1021 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Credit Card Origination</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+<title>CardFlow — Credit Card Origination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Poppins;
-}
+  :root{
+    --navy: #101B33;
+    --navy-2: #1C2B4A;
+    --paper: #F5F6F4;
+    --surface: #FFFFFF;
+    --accent: #B8842A;
+    --accent-soft: #F1E4CB;
+    --emerald: #1F7A5C;
+    --emerald-soft: #E1F0EA;
+    --rust: #AE4230;
+    --rust-soft: #F5E4E0;
+    --text: #16202E;
+    --text-muted: #5B6472;
+    --border: #E1E4E8;
+    --radius: 10px;
+  }
 
-body{
-min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:linear-gradient(120deg,#ffffff,#f7f7f7);
-overflow:hidden;
-}
+  *{ box-sizing: border-box; }
 
-/* GOLD ANIMATED BACKGROUND */
-body::before{
-content:"";
-position:absolute;
-width:600px;
-height:600px;
-background:radial-gradient(circle,#ffd70055,#ffffff00 70%);
-top:-150px;
-left:-150px;
-animation:float1 6s infinite ease-in-out;
-}
+  html,body{
+    margin:0; padding:0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
 
-body::after{
-content:"";
-position:absolute;
-width:500px;
-height:500px;
-background:radial-gradient(circle,#ffd70033,#ffffff00 70%);
-bottom:-120px;
-right:-120px;
-animation:float2 7s infinite ease-in-out;
-}
+  .num{ font-family: 'IBM Plex Mono', monospace; font-weight: 600; letter-spacing: -0.01em; }
 
-@keyframes float1{
-0%,100%{transform:translate(0,0);}
-50%{transform:translate(40px,60px);}
-}
+  a{ color: inherit; }
 
-@keyframes float2{
-0%,100%{transform:translate(0,0);}
-50%{transform:translate(-50px,-40px);}
-}
+  /* ---------- Shell ---------- */
+  .app{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-.wrapper{
-width:1100px;
-display:flex;
-gap:30px;
-z-index:1;
-}
+  header.topbar{
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
 
-/* FORM */
-.container{
-flex:1;
-background:white;
-padding:30px;
-border-radius:18px;
-box-shadow:0 15px 40px rgba(0,0,0,0.1);
-}
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .brand-mark{
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+    position: relative;
+    flex-shrink:0;
+  }
+  .brand-mark::after{
+    content:"";
+    position:absolute; left:5px; top:9px;
+    width:16px; height:8px;
+    border-radius:2px;
+    background: var(--accent);
+  }
 
-h1{
-text-align:center;
-color:#b8860b;
-margin-bottom:5px;
-}
+  .topbar-meta{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
 
-.sub{
-text-align:center;
-font-size:13px;
-color:#888;
-margin-bottom:20px;
-}
+  main{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    padding: 40px 20px 80px;
+  }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-}
+  .wrap{ width: 100%; max-width: 720px; }
 
-input,select{
-padding:12px;
-border:1px solid #eee;
-border-radius:10px;
-outline:none;
-transition:0.3s;
-}
+  /* ---------- Stepper ---------- */
+  .stepper{
+    display:flex;
+    align-items:flex-start;
+    margin-bottom: 36px;
+  }
+  .step-item{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    position:relative;
+  }
+  .step-line{
+    position:absolute;
+    top:15px; left:calc(50% + 20px); right:calc(-50% + 20px);
+    height:2px;
+    background: var(--border);
+    z-index:0;
+  }
+  .step-item:last-child .step-line{ display:none; }
+  .step-item.done .step-line{ background: var(--emerald); }
 
-input:focus,select:focus{
-border-color:#d4af37;
-box-shadow:0 0 10px #ffd70055;
-}
+  .step-dot{
+    width:30px; height:30px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600; font-size:0.8rem;
+    color: var(--text-muted);
+    z-index:1;
+    transition: all .25s ease;
+  }
+  .step-item.active .step-dot{
+    border-color: var(--navy);
+    color: var(--navy);
+    background: var(--surface);
+    box-shadow: 0 0 0 4px rgba(16,27,51,0.08);
+  }
+  .step-item.done .step-dot{
+    border-color: var(--emerald);
+    background: var(--emerald);
+    color: #fff;
+  }
+  .step-label{
+    margin-top:8px;
+    font-size:0.75rem;
+    color: var(--text-muted);
+    max-width: 110px;
+    line-height:1.3;
+  }
+  .step-item.active .step-label{ color: var(--navy); font-weight:600; }
+  .step-item.done .step-label{ color: var(--emerald); }
 
-button{
-width:100%;
-margin-top:15px;
-padding:13px;
-border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#d4af37,#b8860b);
-color:white;
-font-weight:600;
-cursor:pointer;
-transition:0.3s;
-}
+  /* ---------- Card / panel ---------- */
+  .panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 36px 28px;
+    animation: rise .35s ease;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .panel{ animation:none; }
+  }
 
-button:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 25px #ffd70066;
-}
+  .panel h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 1.5rem;
+    margin: 0 0 6px;
+    color: var(--navy);
+  }
+  .panel .sub{
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin: 0 0 28px;
+    line-height:1.5;
+  }
 
-/* STEP */
-.progress{
-display:flex;
-justify-content:space-between;
-margin-top:25px;
-position:relative;
-}
+  /* ---------- Form ---------- */
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .field{ margin-bottom: 18px; display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:0.8rem; font-weight:600; color: var(--navy); }
+  .field .hint{ font-size:0.72rem; color: var(--text-muted); margin-top:-2px; }
+  input[type=text], input[type=number], input[type=date], select{
+    font-family: inherit;
+    font-size: 0.92rem;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--paper);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus, select:focus{
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(16,27,51,0.08);
+    background: var(--surface);
+  }
+  .field.error input, .field.error select{ border-color: var(--rust); }
+  .field .errmsg{ font-size:0.72rem; color: var(--rust); display:none; }
+  .field.error .errmsg{ display:block; }
 
-.progress::before{
-content:"";
-position:absolute;
-top:16px;
-left:0;
-width:100%;
-height:3px;
-background:#eee;
-}
+  .radio-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .radio-chip{
+    border:1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    cursor:pointer;
+    user-select:none;
+    background: var(--paper);
+    transition: all .15s ease;
+  }
+  .radio-chip.selected{
+    border-color: var(--navy);
+    background: var(--navy);
+    color:#fff;
+  }
 
-.step{
-width:34px;
-height:34px;
-border-radius:50%;
-background:#ddd;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:600;
-z-index:1;
-transition:0.4s;
-}
+  /* ---------- Buttons ---------- */
+  .actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  button{
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  button:focus-visible{ outline: 2px solid var(--navy); outline-offset:2px; }
+  .btn-primary{ background: var(--navy); color:#fff; }
+  .btn-primary:hover{ background: var(--navy-2); }
+  .btn-primary:disabled{ background:#B7BCC6; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; color: var(--text-muted); border-color: var(--border); }
+  .btn-ghost:hover{ color: var(--text); border-color: var(--text-muted); }
 
-.active{
-background:#d4af37;
-color:white;
-transform:scale(1.15);
-box-shadow:0 0 12px #ffd700aa;
-}
+  /* ---------- Eligibility checklist ---------- */
+  .score-hero{
+    display:flex; align-items:center; gap:22px;
+    padding: 20px;
+    border-radius: var(--radius);
+    background: var(--navy);
+    color: #fff;
+    margin-bottom: 24px;
+  }
+  .score-ring{
+    width:78px; height:78px; border-radius:50%;
+    background: conic-gradient(var(--accent) calc(var(--pct,0) * 1%), rgba(255,255,255,0.15) 0);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .score-ring-inner{
+    width:60px; height:60px; border-radius:50%;
+    background: var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600; font-size:1rem;
+  }
+  .score-hero .label{ font-size:0.78rem; opacity:0.75; text-transform: none; }
+  .score-hero .value{ font-family:'Fraunces', serif; font-size:1.3rem; margin-top:2px; }
 
-/* RESULT */
-.result{
-margin-top:15px;
-padding:12px;
-display:none;
-color:#333;
-}
+  .checklist{ display:flex; flex-direction:column; gap:10px; margin-bottom: 22px; }
+  .check-row{
+    display:flex; align-items:flex-start; gap:12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    opacity:0;
+    transform: translateY(4px);
+  }
+  .check-row.shown{ animation: fadein .35s ease forwards; }
+  @keyframes fadein{ to{ opacity:1; transform:translateY(0); } }
+  .check-row.pass{ border-color: rgba(31,122,92,0.35); background: var(--emerald-soft); }
+  .check-row.fail{ border-color: rgba(174,66,48,0.35); background: var(--rust-soft); }
+  .check-row.pending .badge{ background: var(--border); }
 
-/* SIDE CARD */
-.cardBox{
-width:350px;
-display:flex;
-align-items:center;
-justify-content:center;
-}
+  .badge{
+    width:20px; height:20px; border-radius:50%;
+    flex-shrink:0; margin-top:1px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.7rem; color:#fff; font-weight:700;
+  }
+  .check-row.pass .badge{ background: var(--emerald); }
+  .check-row.fail .badge{ background: var(--rust); }
 
-.card{
-width:320px;
-height:190px;
-border-radius:18px;
-padding:20px;
-color:white;
-position:relative;
-overflow:hidden;
-transform:scale(0.9);
-transition:0.6s;
-box-shadow:0 20px 40px rgba(0,0,0,0.15);
-}
+  .check-text .title{ font-size:0.87rem; font-weight:600; }
+  .check-text .detail{ font-size:0.78rem; color: var(--text-muted); margin-top:1px; }
 
-.card::before{
-content:"";
-position:absolute;
-width:250px;
-height:250px;
-background:rgba(255,255,255,0.15);
-border-radius:50%;
-top:-120px;
-right:-100px;
-}
+  .status-banner{
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 22px;
+    display:none;
+  }
+  .status-banner.eligible{ background: var(--emerald-soft); color: var(--emerald); display:block; }
+  .status-banner.not-eligible{ background: var(--rust-soft); color: var(--rust); display:block; }
 
-.card h2{
-margin-top:40px;
-font-size:20px;
-}
+  /* ---------- Offers ---------- */
+  .offers{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-bottom: 10px; }
+  .offer-card{
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    cursor:pointer;
+    position:relative;
+    transition: all .15s ease;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .offer-card:hover{ border-color: var(--navy); }
+  .offer-card.selected{
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(16,27,51,0.08);
+  }
+  .offer-card .tier{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.05rem; color:var(--navy);
+  }
+  .offer-card .tier-tag{
+    font-size:0.68rem; letter-spacing:0.02em;
+    color: var(--accent);
+    font-weight:600;
+  }
+  .offer-card .limit{ font-family:'IBM Plex Mono', monospace; font-size:1.3rem; margin: 4px 0; }
+  .offer-card .limit-label{ font-size:0.7rem; color:var(--text-muted); margin-top:-10px; }
+  .offer-card ul{ margin:0; padding-left: 16px; font-size:0.78rem; color: var(--text-muted); line-height:1.6; }
+  .offer-card .pick{
+    margin-top:auto;
+    font-size:0.78rem; font-weight:600; color: var(--navy);
+  }
+  .offer-card.selected .pick::before{ content:"✓ "; color: var(--emerald); }
 
-.card p{
-font-size:13px;
-margin-top:8px;
-opacity:0.9;
-}
+  /* ---------- Summary / confirmation ---------- */
+  .summary-row{
+    display:flex; justify-content:space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.86rem;
+  }
+  .summary-row:last-child{ border-bottom:none; }
+  .summary-row .k{ color: var(--text-muted); }
+  .summary-row .v{ font-weight:600; }
 
-/* CARD TYPES */
-.gold{
-background:linear-gradient(135deg,#ffd700,#b8860b);
-}
+  .success-wrap{ text-align:center; padding: 10px 0 4px; }
+  .success-icon{
+    width:56px; height:56px; border-radius:50%;
+    background: var(--emerald-soft);
+    color: var(--emerald);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 18px;
+    font-size:1.5rem;
+  }
+  .app-id{
+    font-family:'IBM Plex Mono', monospace;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius:7px;
+    padding: 10px 16px;
+    display:inline-block;
+    margin: 14px 0 6px;
+    letter-spacing:0.03em;
+  }
 
-.silver{
-background:linear-gradient(135deg,#e5e7eb,#9ca3af);
-color:#222;
-}
+  .timeline{ margin-top: 26px; display:flex; flex-direction:column; gap: 0; }
+  .tl-item{ display:flex; gap:14px; position:relative; padding-bottom: 22px; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-dot{
+    width:10px; height:10px; border-radius:50%;
+    background: var(--emerald);
+    margin-top:5px; flex-shrink:0; position:relative; z-index:1;
+  }
+  .tl-item:not(:last-child)::before{
+    content:"";
+    position:absolute; left:4.5px; top:16px; bottom:0;
+    width:1px; background: var(--border);
+  }
+  .tl-text .title{ font-size:0.85rem; font-weight:600; }
+  .tl-text .sub{ font-size:0.76rem; color:var(--text-muted); margin-top:1px; }
 
-.platinum{
-background:linear-gradient(135deg,#1f1f1f,#434343);
-}
-
-.flip{
-transform:rotateY(360deg) scale(1);
-}
-
-.reject{
-margin-top:10px;
-color:red;
-font-weight:600;
-display:none;
-}
-
-@media(max-width:900px){
-.wrapper{flex-direction:column;}
-.cardBox{width:100%;}
-}
+  @media (max-width: 640px){
+    .grid2, .offers{ grid-template-columns: 1fr; }
+    .panel{ padding: 26px 20px 22px; }
+    .step-label{ display:none; }
+  }
 </style>
 </head>
-
 <body>
 
-<div class="wrapper">
+<div class="app">
 
-<!-- FORM -->
-<div class="container">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"></span> CardFlow</div>
+    <div class="topbar-meta">Credit Card Origination — Demo</div>
+  </header>
 
-<h1>Credit Card Origination</h1>
-<div class="sub">Luxury Banking Experience • Instant Eligibility Check</div>
+  <main>
+    <div class="wrap">
 
-<div class="grid">
-<input id="name" placeholder="Full Name">
-<input id="age" type="number" placeholder="Age">
+      <div class="stepper" id="stepper"></div>
 
-<input id="income" type="number" placeholder="Monthly Income">
-<select id="emp">
-<option>Salaried</option>
-<option>Self Employed</option>
-<option>Student</option>
-<option>Unemployed</option>
-</select>
+      <div class="panel" id="panel"></div>
 
-<input id="credit" type="number" placeholder="Credit Score">
-<select id="loan">
-<option>No Loan</option>
-<option>Loan</option>
-</select>
-</div>
-
-<button onclick="process()">Check Eligibility</button>
-
-<div class="progress">
-<div class="step" id="s1">1</div>
-<div class="step" id="s2">2</div>
-<div class="step" id="s3">3</div>
-<div class="step" id="s4">4</div>
-</div>
-
-<div class="result" id="result"></div>
-<div class="reject" id="reject">Application Rejected</div>
-
-</div>
-
-<!-- SIDE CARD -->
-<div class="cardBox">
-<div class="card gold" id="card">
-<h2>Gold Card</h2>
-<p>Premium Cashback<br>Travel Benefits<br>Reward Points</p>
-</div>
-</div>
+    </div>
+  </main>
 
 </div>
 
 <script>
+/* =========================================================
+   STATE
+   ========================================================= */
+const STEPS = [
+  { key: 'application',  label: 'Application' },
+  { key: 'eligibility',  label: 'Eligibility Check' },
+  { key: 'offer',        label: 'Offer Generation' },
+  { key: 'shipping',     label: 'Shipping' },
+];
 
-function step(n){
-for(let i=1;i<=4;i++)
-document.getElementById("s"+i).classList.remove("active");
+const state = {
+  step: 0, // index into STEPS
+  applicant: {
+    name: '', dob: '', panId: '',
+    employmentType: 'salaried',
+    monthlyIncome: '', yearsEmployed: '',
+    monthlyEmi: '', city: ''
+  },
+  eligibility: {
+    computed: false,
+    creditScore: 0,
+    checks: [],
+    overallEligible: false
+  },
+  offers: [],
+  selectedTierId: null,
+  shipping: { addressLine: '', city: '', pincode: '', phone: '' },
+  applicationId: null
+};
 
-for(let i=1;i<=n;i++)
-document.getElementById("s"+i).classList.add("active");
+/* =========================================================
+   RULE ENGINE
+   ---------------------------------------------------------
+   1. Credit score generation (rule-based, CIBIL-like 300-900)
+   2. 5-criteria eligibility evaluation
+   3. Offer recommendation logic
+   ========================================================= */
+
+function computeCreditScore(a){
+  const income = Number(a.monthlyIncome) || 0;
+  const emi = Number(a.monthlyEmi) || 0;
+  const years = Number(a.yearsEmployed) || 0;
+
+  let score = 300; // base
+
+  // income contribution (up to +260)
+  score += Math.min(260, Math.round(income / 500));
+
+  // employment stability (up to +120)
+  score += Math.min(120, years * 20);
+
+  // employment type weight
+  const empWeight = { salaried: 90, self_employed: 55, student: 15, unemployed: 0 };
+  score += empWeight[a.employmentType] ?? 30;
+
+  // debt-to-income penalty
+  const dti = income > 0 ? emi / income : 1;
+  if (dti > 0.6) score -= 150;
+  else if (dti > 0.4) score -= 80;
+  else if (dti > 0.25) score -= 20;
+  else score += 40;
+
+  return Math.max(300, Math.min(900, Math.round(score)));
 }
 
-function process(){
+function evaluateEligibility(a, creditScore){
+  const income = Number(a.monthlyIncome) || 0;
+  const emi = Number(a.monthlyEmi) || 0;
+  const years = Number(a.yearsEmployed) || 0;
+  const dti = income > 0 ? emi / income : 1;
+  const age = a.dob ? getAge(a.dob) : 0;
 
-step(1);
+  const checks = [
+    {
+      title: 'Minimum credit score (650+)',
+      pass: creditScore >= 650,
+      detail: `Computed score: ${creditScore}`
+    },
+    {
+      title: 'Minimum monthly income (₹25,000+)',
+      pass: income >= 25000,
+      detail: `Reported income: ₹${income.toLocaleString('en-IN')}/mo`
+    },
+    {
+      title: 'Eligible employment type',
+      pass: a.employmentType === 'salaried' || a.employmentType === 'self_employed',
+      detail: `Employment type: ${employmentLabel(a.employmentType)}`
+    },
+    {
+      title: 'Age between 21 and 60',
+      pass: age >= 21 && age <= 60,
+      detail: age ? `Applicant age: ${age}` : 'Date of birth not provided'
+    },
+    {
+      title: 'Debt-to-income ratio under 40%',
+      pass: dti <= 0.4,
+      detail: `Current DTI: ${(dti * 100).toFixed(0)}%`
+    },
+    {
+      title: 'Minimum employment tenure (6+ months)',
+      pass: years >= 0.5,
+      detail: `Tenure: ${years} year(s)`
+    }
+  ];
 
-let income=+document.getElementById("income").value;
-let age=+document.getElementById("age").value;
-let credit=+document.getElementById("credit").value;
-let emp=document.getElementById("emp").value;
-let loan=document.getElementById("loan").value;
-
-let score=300;
-score+=credit*0.5;
-if(income>50000) score+=120;
-if(emp=="Salaried") score+=80;
-if(age>=21 && age<=60) score+=50;
-if(loan=="No Loan") score+=60;
-
-score=Math.min(900,Math.round(score));
-
-setTimeout(()=>{
-
-step(2);
-
-let eligible=score>=650 && emp!="Unemployed" && income>25000;
-
-document.getElementById("result").style.display="block";
-document.getElementById("result").innerHTML="Credit Score: <b>"+score+"</b>";
-
-if(!eligible){
-step(4);
-document.getElementById("reject").style.display="block";
-return;
+  const overallEligible = checks.every(c => c.pass);
+  return { checks, overallEligible };
 }
 
-step(3);
-
-let card=document.getElementById("card");
-
-card.classList.remove("gold","silver","platinum");
-
-let offer="Silver Card";
-
-if(score>800){
-offer="Platinum Card";
-card.classList.add("platinum");
-card.innerHTML="<h2>Platinum Card</h2><p>Elite Lounge Access<br>Luxury Benefits</p>";
-}
-else if(score>730){
-offer="Gold Card";
-card.classList.add("gold");
-card.innerHTML="<h2>Gold Card</h2><p>Cashback Rewards<br>Travel Offers</p>";
-}
-else{
-offer="Silver Card";
-card.classList.add("silver");
-card.innerHTML="<h2>Silver Card</h2><p>Basic Benefits<br>Entry Level Card</p>";
+function employmentLabel(t){
+  return { salaried: 'Salaried', self_employed: 'Self-employed', student: 'Student', unemployed: 'Unemployed' }[t] || t;
 }
 
-card.classList.add("flip");
-
-document.getElementById("result").innerHTML+="<br>Offer: <b>"+offer+"</b>";
-
-setTimeout(()=>step(4),800);
-
-},800);
+function getAge(dobStr){
+  const dob = new Date(dobStr);
+  if (isNaN(dob)) return 0;
+  const diff = Date.now() - dob.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
 }
 
+function generateOffers(creditScore, income){
+  // Offer recommendation logic: tiers unlocked progressively by score + income
+  const all = [
+    {
+      id: 'silver',
+      tier: 'Silver Card',
+      tag: 'STARTER',
+      minScore: 650, minIncome: 25000,
+      limitMultiplier: 3,
+      perks: ['1% cashback on all spends', 'Zero joining fee', 'Free add-on card']
+    },
+    {
+      id: 'gold',
+      tier: 'Gold Card',
+      tag: 'REWARDS',
+      minScore: 720, minIncome: 45000,
+      limitMultiplier: 5,
+      perks: ['3% cashback on dining & travel', 'Airport lounge access ×4/yr', 'Fuel surcharge waiver']
+    },
+    {
+      id: 'platinum',
+      tier: 'Platinum Card',
+      tag: 'PREMIUM',
+      minScore: 780, minIncome: 90000,
+      limitMultiplier: 8,
+      perks: ['5% cashback on premium categories', 'Unlimited lounge access', 'Concierge & golf privileges']
+    }
+  ];
+
+  return all
+    .filter(o => creditScore >= o.minScore && income >= o.minIncome)
+    .map(o => ({ ...o, limit: Math.round((income * o.limitMultiplier) / 1000) * 1000 }));
+}
+
+/* =========================================================
+   RENDER: STEPPER
+   ========================================================= */
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = STEPS.map((s, i) => {
+    const cls = i < state.step ? 'done' : (i === state.step ? 'active' : '');
+    return `
+      <div class="step-item ${cls}">
+        <div class="step-line"></div>
+        <div class="step-dot">${i < state.step ? '✓' : i + 1}</div>
+        <div class="step-label">${s.label}</div>
+      </div>`;
+  }).join('');
+}
+
+/* =========================================================
+   RENDER: STEP 1 — APPLICATION
+   ========================================================= */
+function renderApplication(){
+  const a = state.applicant;
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <h2>Tell us about yourself</h2>
+    <p class="sub">We use this information to run a rule-based eligibility check across income, employment, credit score and more.</p>
+
+    <div class="grid2">
+      <div class="field" id="f-name">
+        <label for="in-name">Full name</label>
+        <input type="text" id="in-name" value="${a.name}" placeholder="As per ID">
+        <div class="errmsg">Enter your full name.</div>
+      </div>
+      <div class="field" id="f-dob">
+        <label for="in-dob">Date of birth</label>
+        <input type="date" id="in-dob" value="${a.dob}">
+        <div class="errmsg">Enter a valid date of birth.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field" id="f-pan">
+        <label for="in-pan">PAN / Government ID</label>
+        <input type="text" id="in-pan" value="${a.panId}" placeholder="ABCDE1234F">
+        <div class="errmsg">Enter a valid ID number.</div>
+      </div>
+      <div class="field" id="f-city">
+        <label for="in-city">City</label>
+        <input type="text" id="in-city" value="${a.city}" placeholder="e.g. Phagwara">
+        <div class="errmsg">Enter your city.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Employment type</label>
+      <div class="radio-row" id="emp-row">
+        ${['salaried','self_employed','student','unemployed'].map(t => `
+          <div class="radio-chip ${a.employmentType === t ? 'selected' : ''}" data-val="${t}">${employmentLabel(t)}</div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field" id="f-income">
+        <label for="in-income">Monthly income (₹)</label>
+        <input type="number" id="in-income" value="${a.monthlyIncome}" placeholder="45000" min="0">
+        <div class="errmsg">Enter your monthly income.</div>
+      </div>
+      <div class="field" id="f-emi">
+        <label for="in-emi">Existing monthly EMI (₹)</label>
+        <input type="number" id="in-emi" value="${a.monthlyEmi}" placeholder="0" min="0">
+        <span class="hint">Enter 0 if none.</span>
+      </div>
+    </div>
+
+    <div class="field" id="f-years" style="max-width:calc(50% - 9px)">
+      <label for="in-years">Years at current employer</label>
+      <input type="number" id="in-years" value="${a.yearsEmployed}" placeholder="2" min="0" step="0.5">
+      <div class="errmsg">Enter years of employment.</div>
+    </div>
+
+    <div class="actions">
+      <span></span>
+      <button class="btn-primary" id="btn-next">Continue to eligibility check</button>
+    </div>
+  `;
+
+  panel.querySelectorAll('.radio-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      a.employmentType = chip.dataset.val;
+      renderApplication();
+    });
+  });
+
+  document.getElementById('btn-next').addEventListener('click', () => {
+    // sync values
+    a.name = document.getElementById('in-name').value.trim();
+    a.dob = document.getElementById('in-dob').value;
+    a.panId = document.getElementById('in-pan').value.trim();
+    a.city = document.getElementById('in-city').value.trim();
+    a.monthlyIncome = document.getElementById('in-income').value;
+    a.monthlyEmi = document.getElementById('in-emi').value;
+    a.yearsEmployed = document.getElementById('in-years').value;
+
+    if (validateApplication(a)) {
+      state.step = 1;
+      state.eligibility.computed = false;
+      renderAll();
+    }
+  });
+}
+
+function validateApplication(a){
+  const errors = {};
+  if (!a.name) errors['f-name'] = true;
+  if (!a.dob || !getAge(a.dob)) errors['f-dob'] = true;
+  if (!a.panId || a.panId.length < 4) errors['f-pan'] = true;
+  if (!a.city) errors['f-city'] = true;
+  if (!a.monthlyIncome || Number(a.monthlyIncome) <= 0) errors['f-income'] = true;
+  if (a.yearsEmployed === '' || Number(a.yearsEmployed) < 0) errors['f-years'] = true;
+
+  document.querySelectorAll('.field').forEach(f => f.classList.remove('error'));
+  Object.keys(errors).forEach(id => {
+    const f = document.getElementById(id);
+    if (f) f.classList.add('error');
+  });
+  return Object.keys(errors).length === 0;
+}
+
+/* =========================================================
+   RENDER: STEP 2 — ELIGIBILITY CHECK
+   ========================================================= */
+function renderEligibility(){
+  const panel = document.getElementById('panel');
+
+  if (!state.eligibility.computed) {
+    const score = computeCreditScore(state.applicant);
+    const { checks, overallEligible } = evaluateEligibility(state.applicant, score);
+    state.eligibility = { computed: true, creditScore: score, checks, overallEligible };
+  }
+
+  const e = state.eligibility;
+  const pct = Math.round(((e.creditScore - 300) / 600) * 100);
+
+  panel.innerHTML = `
+    <h2>Running your eligibility check</h2>
+    <p class="sub">Rule-based evaluation across ${e.checks.length} criteria, using a generated credit score.</p>
+
+    <div class="score-hero">
+      <div class="score-ring" style="--pct:${pct}">
+        <div class="score-ring-inner num">${e.creditScore}</div>
+      </div>
+      <div>
+        <div class="label">Generated credit score</div>
+        <div class="value">${scoreBand(e.creditScore)}</div>
+      </div>
+    </div>
+
+    <div class="checklist" id="checklist">
+      ${e.checks.map((c, i) => `
+        <div class="check-row pending" data-i="${i}">
+          <div class="badge"></div>
+          <div class="check-text">
+            <div class="title">${c.title}</div>
+            <div class="detail">${c.detail}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="status-banner" id="status-banner"></div>
+
+    <div class="actions">
+      <button class="btn-ghost" id="btn-back">Back</button>
+      <button class="btn-primary" id="btn-next" disabled>View offers</button>
+    </div>
+  `;
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    state.step = 0;
+    renderAll();
+  });
+
+  // animate the checklist reveal, then resolve pass/fail state in sequence
+  const rows = panel.querySelectorAll('.check-row');
+  rows.forEach((row, i) => {
+    setTimeout(() => {
+      const check = e.checks[i];
+      row.classList.remove('pending');
+      row.classList.add(check.pass ? 'pass' : 'fail', 'shown');
+      row.querySelector('.badge').textContent = check.pass ? '✓' : '✕';
+
+      if (i === rows.length - 1) {
+        setTimeout(() => finishEligibilityReveal(), 250);
+      }
+    }, i * 260);
+  });
+}
+
+function scoreBand(score){
+  if (score >= 780) return 'Excellent';
+  if (score >= 720) return 'Very good';
+  if (score >= 650) return 'Good';
+  if (score >= 550) return 'Fair';
+  return 'Needs improvement';
+}
+
+function finishEligibilityReveal(){
+  const e = state.eligibility;
+  const banner = document.getElementById('status-banner');
+  const nextBtn = document.getElementById('btn-next');
+  if (!banner) return;
+
+  if (e.overallEligible) {
+    banner.className = 'status-banner eligible';
+    banner.textContent = 'You meet all eligibility criteria. Generating personalised offers…';
+    state.offers = generateOffers(e.creditScore, Number(state.applicant.monthlyIncome));
+    nextBtn.disabled = state.offers.length === 0;
+    nextBtn.addEventListener('click', () => {
+      state.step = 2;
+      renderAll();
+    });
+  } else {
+    banner.className = 'status-banner not-eligible';
+    banner.textContent = 'Some criteria were not met. You can review your details and try again.';
+    nextBtn.textContent = 'Edit application';
+    nextBtn.disabled = false;
+    nextBtn.addEventListener('click', () => {
+      state.step = 0;
+      renderAll();
+    });
+  }
+}
+
+/* =========================================================
+   RENDER: STEP 3 — OFFER GENERATION
+   ========================================================= */
+function renderOffer(){
+  const panel = document.getElementById('panel');
+
+  if (state.offers.length === 0) {
+    state.offers = generateOffers(state.eligibility.creditScore, Number(state.applicant.monthlyIncome));
+  }
+  if (!state.selectedTierId && state.offers.length){
+    state.selectedTierId = state.offers[state.offers.length - 1].id; // best eligible tier preselected
+  }
+
+  panel.innerHTML = `
+    <h2>Your personalised offers</h2>
+    <p class="sub">Based on your credit score of <strong class="num">${state.eligibility.creditScore}</strong> and reported income, here's what you qualify for.</p>
+
+    <div class="offers">
+      ${state.offers.map(o => `
+        <div class="offer-card ${state.selectedTierId === o.id ? 'selected' : ''}" data-id="${o.id}">
+          <div>
+            <div class="tier-tag">${o.tag}</div>
+            <div class="tier">${o.tier}</div>
+          </div>
+          <div>
+            <div class="limit num">₹${o.limit.toLocaleString('en-IN')}</div>
+            <div class="limit-label">Credit limit</div>
+          </div>
+          <ul>${o.perks.map(p => `<li>${p}</li>`).join('')}</ul>
+          <div class="pick">${state.selectedTierId === o.id ? 'Selected' : 'Select this card'}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost" id="btn-back">Back</button>
+      <button class="btn-primary" id="btn-next">Continue to shipping</button>
+    </div>
+  `;
+
+  panel.querySelectorAll('.offer-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.selectedTierId = card.dataset.id;
+      renderOffer();
+    });
+  });
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    state.step = 1;
+    state.eligibility.computed = false;
+    renderAll();
+  });
+
+  document.getElementById('btn-next').addEventListener('click', () => {
+    state.step = 3;
+    renderAll();
+  });
+}
+
+/* =========================================================
+   RENDER: STEP 4 — SHIPPING
+   ========================================================= */
+function renderShipping(){
+  const s = state.shipping;
+  const panel = document.getElementById('panel');
+  const offer = state.offers.find(o => o.id === state.selectedTierId);
+
+  panel.innerHTML = `
+    <h2>Where should we ship your card?</h2>
+    <p class="sub">Final step — confirm your delivery address to complete the application.</p>
+
+    <div class="field" id="f-addr">
+      <label for="in-addr">Address line</label>
+      <input type="text" id="in-addr" value="${s.addressLine}" placeholder="House no., street, locality">
+      <div class="errmsg">Enter your address.</div>
+    </div>
+
+    <div class="grid2">
+      <div class="field" id="f-scity">
+        <label for="in-scity">City</label>
+        <input type="text" id="in-scity" value="${s.city || state.applicant.city}" placeholder="City">
+        <div class="errmsg">Enter city.</div>
+      </div>
+      <div class="field" id="f-pin">
+        <label for="in-pin">Pincode</label>
+        <input type="text" id="in-pin" value="${s.pincode}" placeholder="144001">
+        <div class="errmsg">Enter a valid 6-digit pincode.</div>
+      </div>
+    </div>
+
+    <div class="field" id="f-phone" style="max-width:calc(50% - 9px)">
+      <label for="in-phone">Mobile number</label>
+      <input type="text" id="in-phone" value="${s.phone}" placeholder="98xxxxxxxx">
+      <div class="errmsg">Enter a valid 10-digit mobile number.</div>
+    </div>
+
+    <div style="margin-top:8px; padding-top:8px;">
+      <div class="summary-row"><span class="k">Selected card</span><span class="v">${offer ? offer.tier : '—'}</span></div>
+      <div class="summary-row"><span class="k">Credit limit</span><span class="v num">₹${offer ? offer.limit.toLocaleString('en-IN') : 0}</span></div>
+      <div class="summary-row"><span class="k">Applicant</span><span class="v">${state.applicant.name}</span></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost" id="btn-back">Back</button>
+      <button class="btn-primary" id="btn-submit">Submit application</button>
+    </div>
+  `;
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    state.step = 2;
+    renderAll();
+  });
+
+  document.getElementById('btn-submit').addEventListener('click', () => {
+    s.addressLine = document.getElementById('in-addr').value.trim();
+    s.city = document.getElementById('in-scity').value.trim();
+    s.pincode = document.getElementById('in-pin').value.trim();
+    s.phone = document.getElementById('in-phone').value.trim();
+
+    if (validateShipping(s)) {
+      state.applicationId = generateApplicationId();
+      renderConfirmation();
+    }
+  });
+}
+
+function validateShipping(s){
+  const errors = {};
+  if (!s.addressLine) errors['f-addr'] = true;
+  if (!s.city) errors['f-scity'] = true;
+  if (!/^\d{6}$/.test(s.pincode)) errors['f-pin'] = true;
+  if (!/^\d{10}$/.test(s.phone)) errors['f-phone'] = true;
+
+  document.querySelectorAll('.field').forEach(f => f.classList.remove('error'));
+  Object.keys(errors).forEach(id => {
+    const f = document.getElementById(id);
+    if (f) f.classList.add('error');
+  });
+  return Object.keys(errors).length === 0;
+}
+
+function generateApplicationId(){
+  const rand = Math.floor(100000 + Math.random() * 900000);
+  return `CF-${new Date().getFullYear()}-${rand}`;
+}
+
+/* =========================================================
+   RENDER: CONFIRMATION (post-shipping)
+   ========================================================= */
+function renderConfirmation(){
+  document.getElementById('stepper').style.display = 'none';
+  const panel = document.getElementById('panel');
+  const offer = state.offers.find(o => o.id === state.selectedTierId);
+
+  panel.innerHTML = `
+    <div class="success-wrap">
+      <div class="success-icon">✓</div>
+      <h2 style="margin-bottom:2px;">Application submitted</h2>
+      <p class="sub" style="margin-bottom:2px;">Your ${offer ? offer.tier : 'card'} is being processed for dispatch.</p>
+      <div class="app-id num">${state.applicationId}</div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-text"><div class="title">Application received</div><div class="sub">Details verified and logged</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-text"><div class="title">Eligibility approved</div><div class="sub">Credit score ${state.eligibility.creditScore} · all criteria met</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-text"><div class="title">${offer ? offer.tier : 'Card'} confirmed</div><div class="sub">Limit ₹${offer ? offer.limit.toLocaleString('en-IN') : 0}</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--accent);"></div>
+        <div class="tl-text"><div class="title">Shipping to ${state.shipping.city}</div><div class="sub">Estimated delivery in 5–7 business days</div></div>
+      </div>
+    </div>
+
+    <div class="actions" style="border-top:none; padding-top:26px; justify-content:center;">
+      <button class="btn-ghost" id="btn-restart">Start a new application</button>
+    </div>
+  `;
+
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    resetState();
+    document.getElementById('stepper').style.display = 'flex';
+    renderAll();
+  });
+}
+
+function resetState(){
+  state.step = 0;
+  state.applicant = { name:'', dob:'', panId:'', employmentType:'salaried', monthlyIncome:'', yearsEmployed:'', monthlyEmi:'', city:'' };
+  state.eligibility = { computed:false, creditScore:0, checks:[], overallEligible:false };
+  state.offers = [];
+  state.selectedTierId = null;
+  state.shipping = { addressLine:'', city:'', pincode:'', phone:'' };
+  state.applicationId = null;
+}
+
+/* =========================================================
+   MASTER RENDER
+   ========================================================= */
+function renderAll(){
+  renderStepper();
+  const renderers = [renderApplication, renderEligibility, renderOffer, renderShipping];
+  renderers[state.step]();
+  document.getElementById('panel').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+renderAll();
 </script>
 
 </body>
